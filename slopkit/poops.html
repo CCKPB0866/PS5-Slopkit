@@ -1270,8 +1270,11 @@ async function sendPayloadToElfldr(name) {
     if (!payloadIsListed(name))
         throw new Error("payload is not listed in this menu");
 
+    /* mod: cache:default lets the AppCache serve the payload instantly
+       (offline and on github.io); no-store forced a fresh CDN download
+       of the full payload there. */
     const response = await fetch("../payloads/" + encodeURIComponent(name),
-        { cache: "no-store" });
+        { cache: "default" });
     if (!response.ok)
         throw new Error("payload fetch failed: HTTP " + response.status);
     const bytes = new Uint8Array(await response.arrayBuffer());
