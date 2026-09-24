@@ -472,6 +472,7 @@ body.st-ok   .glow.green  { opacity: 1; }
 <div class="chips">
     <span>FIRMWARE: <b id="chipFw">detecting...</b></span>
     <span>SUPPORTED: <b>9.00 &ndash; 12.00</b></span>
+    <span>OFFLINE CACHE: <b id="cacheChip">...</b></span>
 </div>
 
 <div id="centerZone">
@@ -622,79 +623,92 @@ function startCachePhase(onDone) {
         return;
     }
 
-    /* mod: cache-page policy per deployment.
-       *.github.io (slow CDN, big payloads stall, one failed file aborts the
-       whole AppCache batch): silent background caching, never in the way.
-       Local server (LAN, instant): show the cache page as real progress
-       feedback -- but it can never hold the UI hostage (skip button,
-       release on cached/error, 15 s cap). */
+    /* mod: cache-page policy per deployment + never-give-up caching.
+       *.github.io (slow CDN; AppCache aborts the whole batch when any single
+       file fails): silent background caching. Local server (LAN): show the
+       cache page as progress feedback. Either way the UI is never held
+       hostage (skip / release / 15 s cap) and the cache is retried every
+       45 s until it completes -- one failed file used to mean "never
+       cached" forever. Status lives in the OFFLINE CACHE chip. */
     var SILENT_CACHE = /\.github\.io$/i.test(location.hostname);
+    var cacheDone = false;
+    var cacheChip = document.getElementById("cacheChip");
+    function chipSet(text, cls) {
+        if (!cacheChip) return;
+        cacheChip.textContent = text;
+        cacheChip.style.color = cls === "ok" ? "var(--green)"
+            : cls === "err" ? "var(--red)" : "";
+    }
+    var early = false;
+    function enterAnyway() {
+        if (early) return;
+        early = true;
+        hide(false);
+        enter();
+    }
     if (!SILENT_CACHE && ac.status === ac.UNCACHED) {
         show();
-        var early = false;
-        function enterAnyway() {
-            if (early) return;
-            early = true;
-            hide(false);
-            enter();
-        }
         var skipBtn = document.getElementById("cacheSkip");
         if (skipBtn) skipBtn.onclick = enterAnyway;
-        ac.addEventListener("progress", function (e) {
-            if (e.total && e.total > 0) {
-                var pct = Math.min(99, Math.round((e.loaded / e.total) * 100));
-                cacheFill.style.width = pct + "%";
-                cachePct.textContent = pct + "%";
-            }
-        });
-        ac.addEventListener("cached", function () {
-            cacheFill.style.width = "100%";
-            cachePct.textContent = "100%";
-            cacheSub.textContent = "Cache complete. Starting...";
-            setTimeout(function () { enterAnyway(); }, 650);
-        });
-        ac.addEventListener("error", function () {
-            cacheSub.textContent = "Cache is slow or failed -- continuing anyway.";
-            cacheSub.style.color = "#ff6473";
-            setTimeout(function () { enterAnyway(); }, 1500);
-        });
         setTimeout(function () { if (!early) enterAnyway(); }, 15000);
-        return;
+    } else {
+        enter();
     }
 
-    enter();
-
-    /* mod: background updates stay silent -- showing the overlay here froze
-       the progress bar (update progress events carry e.total=0) and updates
-       finish with updateready, not cached. The UI is already usable behind. */
     var cacheLogged = false;
+    ac.addEventListener("checking", function () { chipSet("checking..."); });
     ac.addEventListener("downloading", function () {
         if (!cacheLogged) {
             cacheLogged = true;
             log("offline cache: downloading in the background", "");
         }
+        chipSet("downloading...");
     });
     ac.addEventListener("progress", function (e) {
-        if (!shown) return;
-        if (e.total && e.total > 0) {
+        chipSet(e.total && e.total > 0
+            ? "downloading " + e.loaded + "/" + e.total : "downloading...");
+        if (shown && e.total && e.total > 0) {
             var pct = Math.min(99, Math.round((e.loaded / e.total) * 100));
             cacheFill.style.width = pct + "%";
             cachePct.textContent = pct + "%";
         }
     });
     ac.addEventListener("cached", function () {
-        hide(false);
+        cacheDone = true;
+        chipSet("ready -- fully offline", "ok");
         log("offline cache ready -- the host is now fully offline capable", "ok");
+        if (shown) {
+            cacheFill.style.width = "100%";
+            cachePct.textContent = "100%";
+            cacheSub.textContent = "Cache complete. Starting...";
+            setTimeout(enterAnyway, 650);
+        }
+    });
+    ac.addEventListener("noupdate", function () {
+        cacheDone = true;
+        chipSet("ready -- fully offline", "ok");
     });
     ac.addEventListener("updateready", function () {
+        cacheDone = true;
         hide(true);
         try { ac.swapCache(); } catch (err) { }
+        chipSet("updated", "ok");
         log("offline cache updated -- new version active from the next visit", "");
     });
     ac.addEventListener("error", function () {
-        if (!cacheLogged) cacheLogged = true;
-        log("offline cache incomplete -- online only for now", "err");
+        chipSet("incomplete -- retrying", "err");
+        log("offline cache incomplete -- will retry", "err");
     });
+    /* mod: keep retrying until the cache completes -- AppCache is
+       all-or-nothing (one failed file aborts the batch), so repeated
+       attempts are the only cure for a flaky CDN. */
+    setInterval(function () {
+        if (cacheDone) return;
+        try {
+            if (ac.status === 2 || ac.status === 3 || ac.status === 4) return;
+            ac.update();
+        } catch (err) { }
+    }, 45000);
 }
 
 var PAYLOADS = [
