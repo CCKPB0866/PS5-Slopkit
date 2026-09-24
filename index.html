@@ -623,6 +623,13 @@ function startCachePhase(onDone) {
 
     if (ac.status === ac.UNCACHED) {
         show();
+        var early = false;
+        function enterAnyway() {
+            if (early) return;
+            early = true;
+            hide(false);
+            enter();
+        }
         ac.addEventListener("progress", function (e) {
             if (e.total && e.total > 0) {
                 var pct = Math.min(99, Math.round((e.loaded / e.total) * 100));
@@ -634,26 +641,33 @@ function startCachePhase(onDone) {
             cacheFill.style.width = "100%";
             cachePct.textContent = "100%";
             cacheSub.textContent = "Cache complete. Starting...";
-            setTimeout(function () {
-                hide(false);
-                enter();
-            }, 650);
+            setTimeout(function () { enterAnyway(); }, 650);
         });
         ac.addEventListener("error", function () {
-            cacheSub.textContent = "Cache failed. Check the connection and refresh this page.";
+            cacheSub.textContent = "Cache is slow or failed -- continuing anyway.";
             cacheSub.style.color = "#ff6473";
+            setTimeout(function () { enterAnyway(); }, 1500);
         });
+        /* mod: the cache screen must never hold the UI hostage -- the big
+           payload files can stall on a slow/filtered CDN and then `cached`
+           never fires (bar frozen at 0% forever). Enter after 15 s no matter
+           what; caching keeps running in the background. */
         setTimeout(function () {
-            if (shown && !entered && ac.status === ac.DOWNLOADING) {
-                cacheSub.textContent = "Still downloading... please keep this page open.";
+            if (!early && shown) {
+                cacheSub.textContent =
+                    "Caching is slow -- continuing; it finishes in the background.";
+                enterAnyway();
             }
-        }, 30000);
+        }, 15000);
         return;
     }
 
     enter();
 
-    ac.addEventListener("downloading", function () { show(); });
+    /* mod: background updates stay silent -- showing the overlay here froze
+       the progress bar (update progress events carry e.total=0) and updates
+       finish with updateready, not cached. The UI is already usable behind. */
+    ac.addEventListener("downloading", function () { });
     ac.addEventListener("progress", function (e) {
         if (!shown) return;
         if (e.total && e.total > 0) {
@@ -890,12 +904,24 @@ var AUTO_PLK_NAME = "PLK.elf";
 var AUTO_PLK_TEXT = "PS5 Payload Manager will be sent in 3 seconds";
 var AUTO_START = false;
 function closePage() {
+    /* mod: never wipe document.body -- the hidden exploit iframe lives in
+       it and destroying it kills the state mid-send. window.close() can be
+       refused on https pages; try twice, then veil the screen with a hint
+       while the iframe stays alive. */
     try { window.close(); } catch (e) { }
     setTimeout(function () {
+        try { window.close(); } catch (e) { }
         try {
-            document.body.style.background = "#000";
-            document.documentElement.style.background = "#000";
-            document.body.innerHTML = "";
+            var veil = document.createElement("div");
+            veil.style.cssText = "position:fixed;left:0;top:0;right:0;bottom:0;"
+                + "background:#000;z-index:99999;";
+            document.body.appendChild(veil);
+            var tip = document.createElement("div");
+            tip.style.cssText = "position:fixed;left:0;top:0;right:0;bottom:0;"
+                + "z-index:100000;color:#8a94a6;display:flex;align-items:center;"
+                + "justify-content:center;font:600 18px system-ui,sans-serif;";
+            tip.textContent = "Done. You can close the browser now.";
+            document.body.appendChild(tip);
         } catch (e) { }
     }, 2000);
 }
