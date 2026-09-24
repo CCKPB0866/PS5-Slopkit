@@ -464,6 +464,7 @@ body.st-ok   .glow.green  { opacity: 1; }
         <div id="cacheFill"></div>
         <span id="cachePct">0%</span>
     </div>
+    <button id="cacheSkip" style="margin-top:18px;padding:10px 26px;background:transparent;border:1px solid #2e3a4e;border-radius:999px;color:#8a94a6;font:600 15px system-ui,sans-serif;cursor:pointer;">skip &rarr; enter now</button>
 </div>
 
 <h1>PS5 Slopkit Webkit Exploit Jailbreak</h1>
@@ -621,7 +622,14 @@ function startCachePhase(onDone) {
         return;
     }
 
-    if (ac.status === ac.UNCACHED) {
+    /* mod: cache-page policy per deployment.
+       *.github.io (slow CDN, big payloads stall, one failed file aborts the
+       whole AppCache batch): silent background caching, never in the way.
+       Local server (LAN, instant): show the cache page as real progress
+       feedback -- but it can never hold the UI hostage (skip button,
+       release on cached/error, 15 s cap). */
+    var SILENT_CACHE = /\.github\.io$/i.test(location.hostname);
+    if (!SILENT_CACHE && ac.status === ac.UNCACHED) {
         show();
         var early = false;
         function enterAnyway() {
@@ -630,6 +638,8 @@ function startCachePhase(onDone) {
             hide(false);
             enter();
         }
+        var skipBtn = document.getElementById("cacheSkip");
+        if (skipBtn) skipBtn.onclick = enterAnyway;
         ac.addEventListener("progress", function (e) {
             if (e.total && e.total > 0) {
                 var pct = Math.min(99, Math.round((e.loaded / e.total) * 100));
@@ -648,17 +658,7 @@ function startCachePhase(onDone) {
             cacheSub.style.color = "#ff6473";
             setTimeout(function () { enterAnyway(); }, 1500);
         });
-        /* mod: the cache screen must never hold the UI hostage -- the big
-           payload files can stall on a slow/filtered CDN and then `cached`
-           never fires (bar frozen at 0% forever). Enter after 15 s no matter
-           what; caching keeps running in the background. */
-        setTimeout(function () {
-            if (!early && shown) {
-                cacheSub.textContent =
-                    "Caching is slow -- continuing; it finishes in the background.";
-                enterAnyway();
-            }
-        }, 15000);
+        setTimeout(function () { if (!early) enterAnyway(); }, 15000);
         return;
     }
 
@@ -667,7 +667,13 @@ function startCachePhase(onDone) {
     /* mod: background updates stay silent -- showing the overlay here froze
        the progress bar (update progress events carry e.total=0) and updates
        finish with updateready, not cached. The UI is already usable behind. */
-    ac.addEventListener("downloading", function () { });
+    var cacheLogged = false;
+    ac.addEventListener("downloading", function () {
+        if (!cacheLogged) {
+            cacheLogged = true;
+            log("offline cache: downloading in the background", "");
+        }
+    });
     ac.addEventListener("progress", function (e) {
         if (!shown) return;
         if (e.total && e.total > 0) {
@@ -678,15 +684,16 @@ function startCachePhase(onDone) {
     });
     ac.addEventListener("cached", function () {
         hide(false);
+        log("offline cache ready -- the host is now fully offline capable", "ok");
     });
     ac.addEventListener("updateready", function () {
         hide(true);
         try { ac.swapCache(); } catch (err) { }
-        if (state === "boot" || state === "ready" || state === "failed") {
-            location.reload();
-        }
+        log("offline cache updated -- new version active from the next visit", "");
     });
     ac.addEventListener("error", function () {
+        if (!cacheLogged) cacheLogged = true;
+        log("offline cache incomplete -- online only for now", "err");
     });
 }
 
