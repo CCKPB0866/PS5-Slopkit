@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en" manifest="slopkit.appcache">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PS5 FW 9.0-12.0 SlopKit Jailbreak by CCKPB0866</title>
+<style>
+
+:root {
+    --bg:      #121620;
+    --panel:   #171c26;
+    --card:    #181d27;
+    --line:    #2e3a4e;
+    --text:    #e8ecf1;
+    --dim:     #8a94a6;
+    --green:   #3ddc84;
+    --red:     #d64550;
+    --yellow:  #e5c14b;
+    --sky:     rgba(108, 186, 255, .30);
+    --green-08: rgba(61, 220, 132, .08);
+    --green-25: rgba(61, 220, 132, .25);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+    background:
+        radial-gradient(1100px 500px at 50% -8%, #24365340 0%, transparent 60%),
+        var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    display: flex; flex-direction: column;
+    padding: 30px 48px 10px;
+}
+
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar:hover { width: 16px; height: 16px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, .18);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, .30);
+    background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:active {
+    background: rgba(255, 255, 255, .42);
+    background-clip: padding-box;
+}
+
+h1 {
+    text-align: center;
+    color: #fff;
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    margin-bottom: 22px;
+    white-space: nowrap;
+}
+
+.chips {
+    display: flex; justify-content: center;
+    margin-bottom: 24px;
+}
+.chips span {
+    font-size: 13px; letter-spacing: 1.5px;
+    color: var(--dim);
+    border: 1px solid var(--sky);
+    border-radius: 999px;
+    padding: 5px 16px;
+    margin: 0 5px;
+}
+.chips span b { color: #cfe7ff; font-weight: 600; }
+
+.glow {
+    position: fixed;
+    top: 0; right: 0; bottom: 0; left: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1.4s ease;
+}
+.glow.red    { background: radial-gradient(95vmin 160vmin at 50% -12%, rgba(214, 69, 80, .13),  transparent 72%); }
+.glow.yellow { background: radial-gradient(95vmin 160vmin at 50% -12%, rgba(229, 193, 75, .12), transparent 72%); }
+.glow.green  { background: radial-gradient(95vmin 160vmin at 50% -12%, rgba(61, 220, 132, .14), transparent 72%); }
+body.st-idle .glow.red    { opacity: 1; }
+body.st-run  .glow.yellow { opacity: 1; }
+body.st-ok   .glow.green  { opacity: 1; }
+
+#cacheView {
+    position: fixed;
+    top: 0; right: 0; bottom: 0; left: 0;
+    z-index: 50;
+    background:
+        radial-gradient(1100px 500px at 50% -8%, #24365340 0%, transparent 60%),
+        var(--bg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    transition: opacity .6s ease, transform .6s ease;
+}
+#cacheView.hide { opacity: 0; transform: scale(.985); pointer-events: none; }
+#cacheView h2 {
+    color: #fff; font-size: 40px; font-weight: 700;
+    letter-spacing: 2.5px;
+    text-align: center;
+}
+#cacheView .sub {
+    color: rgba(232, 236, 241, .45);
+    font-size: 18px; letter-spacing: 1px;
+    text-align: center; margin-top: 12px;
+}
+#cacheTrack {
+    position: relative;
+    width: 72%;
+    max-width: 560px;
+    height: 38px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid var(--line);
+    overflow: hidden;
+    margin-top: 28px;
+}
+
+#cacheFill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg,
+        #2bb373, #3ddc84, #59ffa9, #3ddc84, #2bb373);
+    background-size: 300% 100%;
+    animation: flow 1.6s linear infinite;
+}
+#cachePct {
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 17px;
+    letter-spacing: 1px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .6);
+}
+
+#centerZone {
+    display: flex; flex-direction: column;
+    align-items: center;
+    margin-bottom: 24px;
+}
+#jbBtn {
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    border: 3px solid var(--red);
+    background: var(--red);
+    color: #fff;
+    font: 700 24px/1.2 system-ui, -apple-system, "Segoe UI", sans-serif;
+    cursor: pointer;
+    position: relative;
+    transition: border-color .6s, background-color .6s, color .6s, box-shadow .6s;
+}
+#jbBtn:hover { box-shadow: 0 0 32px rgba(214, 69, 80, .35); }
+#jbBtn:focus { outline: 3px solid rgba(255, 255, 255, .45); outline-offset: 4px; }
+
+#jbBtn .lbl {
+    position: absolute;
+    left: 8px; right: 8px; top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease;
+}
+#jbBtn .lbl.small { font-size: 19px; }
+#jbBtn .l1 { opacity: 1; }
+#jbBtn.running .l1 { opacity: 0; }
+#jbBtn.running .l2 { opacity: 1; top: 44%; }
+#jbBtn.done .l1 { opacity: 0; }
+#jbBtn.done .l3 { opacity: 1; }
+#jbBtn.failed .l1 { opacity: 0; }
+#jbBtn.failed .l4 { opacity: 1; }
+#jbBtn.broken .l1 { opacity: 0; }
+#jbBtn.broken .l5 { opacity: 1; }
+#jbBtn .pct {
+    position: absolute;
+    left: 0; right: 0; top: 66%;
+    text-align: center;
+    font-size: 15px; font-weight: 600;
+    color: rgba(43, 36, 5, .65); letter-spacing: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+#jbBtn.running .pct { opacity: 1; }
+
+
+#jbBtn.running {
+    cursor: default;
+    background: var(--yellow);
+    border-color: var(--yellow);
+    color: #2b2405;
+    box-shadow: 0 0 32px rgba(229, 193, 75, .30);
+}
+
+#jbBtn.done {
+    cursor: default;
+    background: var(--green);
+    border-color: var(--green);
+    color: #06220f;
+    box-shadow: 0 0 34px rgba(61, 220, 132, .35);
+}
+
+#jbBtn.failed {
+    cursor: pointer;
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+    box-shadow: 0 0 30px rgba(214, 69, 80, .4);
+}
+
+#jbBtn.broken {
+    cursor: default;
+    background: #5a2730;
+    border-color: #5a2730;
+    color: #ffb3ba;
+    box-shadow: none;
+}
+
+#payBtn {
+    margin-top: 18px;
+    min-width: 200px;
+    padding: 13px 34px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--text);
+    font: 600 16px system-ui, -apple-system, "Segoe UI", sans-serif;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: border-color .15s, background-color .15s, color .15s;
+}
+#payBtn:focus, #payBtn:hover {
+    outline: none;
+    border-color: var(--green);
+    color: #fff;
+    background: #141c18;
+}
+#payBtn.off { opacity: .3; pointer-events: none; }
+#payBtn.deny {
+    border-color: rgba(214, 69, 80, .6);
+    color: #ff8a94;
+    background: transparent;
+}
+
+#views { position: relative; flex: 1; min-height: 120px; }
+.view {
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease-in-out;
+}
+.view.selected { opacity: 1 !important; pointer-events: auto !important; }
+
+#logPanel {
+    border: 2px solid rgba(255, 255, 255, .9);
+    border-radius: 16px;
+    background: rgba(22, 30, 46, .6);
+    padding: 24px 22px 16px;
+    display: flex; flex-direction: column;
+}
+#logPanel .label {
+    position: absolute; top: -14px; left: 20px;
+    background: var(--bg);
+    padding: 0 10px;
+    color: #fff; font-weight: 700; font-size: 18px;
+}
+#progTrack {
+    height: 5px; border-radius: 999px;
+    background: rgba(255, 255, 255, .08);
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+#progFill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg,
+        #2bb373, #3ddc84, #59ffa9, #3ddc84, #2bb373);
+    background-size: 300% 100%;
+    animation: flow 1.6s linear infinite;
+    box-shadow: 0 0 10px rgba(61, 220, 132, .35);
+    transition: width .4s ease;
+}
+@keyframes flow { to { background-position: -300% 0; } }
+#logBody {
+    flex: 1; overflow-y: auto;
+    font: 17px/1.6 "Consolas", "Menlo", "DejaVu Sans Mono", monospace;
+    color: var(--dim);
+    white-space: pre-wrap; word-break: break-all;
+    padding-right: 8px;
+}
+#logBody .ts  { color: var(--green); margin-right: 8px; }
+#logBody .ok  { color: var(--text); }
+#logBody .ok::before { content: "[+] "; color: var(--green); }
+#logBody .err { color: #ff6473; }
+#logBody .err::before { content: "[-] "; }
+
+#payloadZone {
+    display: flex; flex-direction: column;
+}
+#payloadZone .head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin: 2px 0 14px 6px;
+}
+#payloadZone .head .t {
+    color: #fff; font-size: 17px; font-weight: 700; letter-spacing: 3px;
+}
+#payloadZone .head .h { color: var(--dim); font-size: 14px; }
+#payloadList {
+    flex: 1; overflow-y: auto;
+    padding: 4px 6px 8px;
+}
+
+.payload {
+    position: relative;
+    display: block;
+    min-height: 88px;
+    padding: 15px 20px 15px 86px;
+    margin-bottom: 12px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    cursor: pointer;
+    transition: border-color .15s, background-color .15s, transform .15s;
+}
+
+#payloadZone.selected .payload { animation: rise .45s ease backwards; }
+@keyframes rise {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: none; }
+}
+.payload:focus, .payload:hover {
+    outline: none;
+    border-color: var(--green);
+    background: #141c18;
+    transform: translateX(6px);
+}
+.payload.home,
+.payload.home:focus,
+.payload.home:hover { transform: none; }
+.payload .badge {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    margin-top: -27px;
+    width: 54px; height: 54px;
+    border-radius: 16px;
+    background: var(--green-08);
+    border: 1px solid var(--green-25);
+    color: var(--green);
+    font-size: 20px; font-weight: 800; letter-spacing: 1px;
+    text-align: center;
+    line-height: 52px;
+}
+.payload .badge.sent {
+    background: var(--green);
+    border-color: var(--green);
+    color: #06220f;
+}
+
+.badge-check {
+    display: inline-block;
+    width: 18px; height: 9px;
+    border-left: 4px solid #06220f;
+    border-bottom: 4px solid #06220f;
+    transform: rotate(-45deg);
+    vertical-align: middle;
+    margin-bottom: 6px;
+}
+.payload .badge.fail {
+    background: rgba(214, 69, 80, .15);
+    border-color: rgba(214, 69, 80, .5);
+    color: #ff8a94;
+}
+.payload .mid { display: block; }
+.payload .name {
+    display: block;
+    font-size: 21px; font-weight: 700; color: #fff;
+    line-height: 1.3;
+    text-align: left;
+    white-space: nowrap;
+}
+.payload .desc {
+    display: block;
+    font-size: 15px; color: var(--dim);
+    margin-top: 4px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+#credit { text-align: center; margin-top: 22px; }
+#credit .t {
+    color: rgba(232, 236, 241, .55);
+    font-size: 15px; font-weight: 700; letter-spacing: 2px;
+}
+#credit .names {
+    color: rgba(232, 236, 241, .45);
+    font-size: 14px; letter-spacing: .5px;
+    margin-top: 4px;
+}
+#credit .mine {
+    color: rgba(232, 236, 241, .36);
+    font-size: 13px; letter-spacing: 1px;
+    margin-top: 14px;
+}
+
+@media (min-width: 1700px) {
+    body { padding: 36px 60px 12px; }
+    h1 { font-size: 44px; }
+    .chips span { font-size: 15px; padding: 6px 20px; }
+    #jbBtn { width: 204px; height: 204px; font-size: 27px; }
+    #jbBtn .lbl.small { font-size: 22px; }
+    #jbBtn .pct { font-size: 17px; }
+    #payBtn { font-size: 18px; min-width: 230px; padding: 14px 40px; }
+    #logPanel .label { font-size: 21px; }
+    #logBody { font-size: 19px; }
+    #cacheView h2 { font-size: 46px; }
+    #cacheView .sub { font-size: 21px; }
+    #cacheTrack { height: 44px; }
+    #cachePct { font-size: 20px; }
+    #payloadZone .head .t { font-size: 20px; }
+    #payloadZone .head .h { font-size: 16px; }
+    .payload { min-height: 100px; padding-left: 96px; border-radius: 20px; }
+    .payload .badge {
+        left: 19px; width: 62px; height: 62px;
+        margin-top: -31px; line-height: 60px;
+        font-size: 23px; border-radius: 18px;
+    }
+    .payload .name { font-size: 25px; }
+    .payload .desc { font-size: 17px; }
+    #credit .t { font-size: 17px; }
+    #credit .names { font-size: 16px; }
+    #credit .mine { font-size: 15px; }
+}
+
+#payloadList {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 0;
+    overflow-x: hidden;
+}
+.payload {
+    width: 49%;
+    margin: 0 2% 12px 0;
+}
+.payload:nth-child(2n) { margin-right: 0; }
+</style>
+</head>
+<body class="st-idle">
+
+<!-- glow layer -->
+<div class="glow red"></div>
+<div class="glow yellow"></div>
+<div class="glow green"></div>
+
+<div id="cacheView">
+    <h2>Creating Cache...</h2>
+    <p class="sub" id="cacheSub">Please wait a moment. Do not close this page!</p>
+    <div id="cacheTrack">
+        <div id="cacheFill"></div>
+        <span id="cachePct">0%</span>
+    </div>
+</div>
+
+<h1>PS5 Slopkit Webkit Exploit Jailbreak</h1>
+
+<div class="chips">
+    <span>FIRMWARE: <b id="chipFw">detecting...</b></span>
+    <span>SUPPORTED: <b>9.00 &ndash; 12.00</b></span>
+</div>
+
+<div id="centerZone">
+    <button id="jbBtn" tabindex="0">
+        <span class="lbl l1">Jailbreak</span>
+        <span class="lbl l2 small">Jailbreak...</span>
+        <span class="lbl l3 small">Jailbreak done</span>
+        <span class="lbl l4">Failed</span>
+        <span class="lbl l5 small">Reboot need</span>
+        <span class="pct">0%</span>
+    </button>
+    <button id="payBtn" tabindex="0">PAYLOADS</button>
+</div>
+
+<div id="views">
+    <div id="logPanel" class="view selected">
+        <span class="label">Log:</span>
+        <div id="progTrack"><div id="progFill"></div></div>
+        <div id="logBody"></div>
+    </div>
+
+    <div id="payloadZone" class="view">
+        <div class="head">
+            <span class="t">PAYLOADS</span>
+            <span class="h" id="payHead">select one to send</span>
+        </div>
+        <div id="payloadList"></div>
+    </div>
+</div>
+
+<div id="credit">
+    <div class="t">Credits</div>
+    <div class="names">Egy, Sonic, Yenyen, Zeco, Gezine, Echostretch, Ufm42,
+        TheFloW, John Tornblom, Flatz, Idlesauce and PS5 R&amp;D Discord.</div>
+    <div class="mine">Modified &amp; Maintained By CCKPB0866.</div>
+</div>
+
+<!-- the real exploit runs in this hidden iframe (stock poops.html) -->
+<iframe id="exploit" src="about:blank" hidden tabindex="-1" title="exploit"></iframe>
+
+<script>
+(function () {
+'use strict';
+
+var jbBtn     = document.getElementById("jbBtn");
+var payBtn    = document.getElementById("payBtn");
+var logPanel  = document.getElementById("logPanel");
+var logBody   = document.getElementById("logBody");
+var progFill  = document.getElementById("progFill");
+var payZone   = document.getElementById("payloadZone");
+var payList   = document.getElementById("payloadList");
+var payHead   = document.getElementById("payHead");
+var cacheView = document.getElementById("cacheView");
+var cacheFill = document.getElementById("cacheFill");
+var cachePct  = document.getElementById("cachePct");
+var cacheSub  = document.getElementById("cacheSub");
+var chipFw    = document.getElementById("chipFw");
+var exploitEl = document.getElementById("exploit");
+
+try { exploitEl.src = "about:blank"; } catch (e) { }
+
+var SUPPORTED_FIRMWARES = ["9.00", "9.05", "9.20", "9.40", "9.60",
+    "10.00", "10.01", "10.20", "10.40", "10.60",
+    "11.00", "11.20", "11.40", "11.60", "12.00"];
+var fwMatch = /PlayStation 5\/(\d+\.\d+)/.exec(navigator.userAgent);
+var fwStr = fwMatch ? fwMatch[1] : "";
+chipFw.textContent = fwStr || "unknown";
+var fwOk = SUPPORTED_FIRMWARES.indexOf(fwStr) !== -1;
+
+var t0 = Date.now();
+function pad2(n) { return n < 10 ? "0" + n : "" + n; }
+var bbQueue = [];
+function bbRecord(text) {
+    bbQueue.push(text);
+    if (bbQueue.length > 400) bbQueue.shift();
+}
+function log(text, cls) {
+    var s = Math.floor((Date.now() - t0) / 1000);
+    var stamp = "[" + pad2(Math.floor(s / 60)) + ":" + pad2(s % 60) + "] ";
+    var line = document.createElement("div");
+    if (cls) line.className = cls;
+    var ts = document.createElement("span");
+    ts.className = "ts";
+    ts.textContent = stamp;
+    line.appendChild(ts);
+    line.appendChild(document.createTextNode(text));
+    logBody.appendChild(line);
+    while (logBody.childElementCount > 200) logBody.removeChild(logBody.firstChild);
+    logBody.scrollTop = logBody.scrollHeight;
+    bbRecord(stamp + text);
+}
+
+var bbInFlight = false, bbDead = false;
+function bbFlush() {
+    if (!bbQueue.length) return;
+    if (bbDead || bbInFlight) return;
+    var body = "[shell] " + bbQueue.join("\n[shell] ");
+    bbQueue = [];
+    bbInFlight = true;
+    try {
+        fetch("/__poops_log", {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=UTF-8" },
+            body: body
+        }).then(function () { bbInFlight = false; },
+            function () { bbInFlight = false; bbDead = true; });
+    } catch (e) { bbInFlight = false; bbDead = true; }
+}
+setInterval(bbFlush, 8000);
+window.addEventListener("pagehide", function () {
+    if (!bbQueue.length) return;
+    try {
+        navigator.sendBeacon("/__poops_log",
+            "[shell] " + bbQueue.join("\n[shell] "));
+    } catch (e) { }
+    bbQueue = [];
+});
+
+function startCachePhase(onDone) {
+    var ac = window.applicationCache;
+    var shown = false;
+    var entered = false;
+
+    function show() {
+        if (shown) return;
+        shown = true;
+        cacheView.style.display = "";
+        cacheView.classList.remove("hide");
+    }
+    function hide(instant) {
+        if (!shown) return;
+        shown = false;
+        if (instant) { cacheView.style.display = "none"; return; }
+        cacheView.classList.add("hide");
+        setTimeout(function () { cacheView.style.display = "none"; }, 620);
+    }
+    function enter() {
+        if (entered) return;
+        entered = true;
+        onDone();
+    }
+
+    cacheView.style.display = "none";
+
+    if (!ac) {
+        cacheSub.textContent = "Offline cache not available. Continuing online...";
+        enter();
+        return;
+    }
+
+    if (ac.status === ac.UNCACHED) {
+        show();
+        ac.addEventListener("progress", function (e) {
+            if (e.total && e.total > 0) {
+                var pct = Math.min(99, Math.round((e.loaded / e.total) * 100));
+                cacheFill.style.width = pct + "%";
+                cachePct.textContent = pct + "%";
+            }
+        });
+        ac.addEventListener("cached", function () {
+            cacheFill.style.width = "100%";
+            cachePct.textContent = "100%";
+            cacheSub.textContent = "Cache complete. Starting...";
+            setTimeout(function () {
+                hide(false);
+                enter();
+            }, 650);
+        });
+        ac.addEventListener("error", function () {
+            cacheSub.textContent = "Cache failed. Check the connection and refresh this page.";
+            cacheSub.style.color = "#ff6473";
+        });
+        setTimeout(function () {
+            if (shown && !entered && ac.status === ac.DOWNLOADING) {
+                cacheSub.textContent = "Still downloading... please keep this page open.";
+            }
+        }, 30000);
+        return;
+    }
+
+    enter();
+
+    ac.addEventListener("downloading", function () { show(); });
+    ac.addEventListener("progress", function (e) {
+        if (!shown) return;
+        if (e.total && e.total > 0) {
+            var pct = Math.min(99, Math.round((e.loaded / e.total) * 100));
+            cacheFill.style.width = pct + "%";
+            cachePct.textContent = pct + "%";
+        }
+    });
+    ac.addEventListener("cached", function () {
+        hide(false);
+    });
+    ac.addEventListener("updateready", function () {
+        hide(true);
+        try { ac.swapCache(); } catch (err) { }
+        if (state === "boot" || state === "ready" || state === "failed") {
+            location.reload();
+        }
+    });
+    ac.addEventListener("error", function () {
+    });
+}
+
+var PAYLOADS = [
+    { tag: "FT", name: "ftpsrv-ps5.elf",         desc: "FTP server - port 2121" },
+    { tag: "GD", name: "gdbsrv-ps5.elf",         desc: "GDB server - port 2159" },
+    { tag: "KL", name: "klogsrv-ps5.elf",        desc: "Kernel log server - port 3232" },
+    { tag: "SH", name: "shsrv-ps5.elf",          desc: "Telnet shell server - port 2323" },
+    { tag: "WB", name: "websrv-ps5.elf",         desc: "Homebrew web server - port 8080" },
+    { tag: "KS", name: "kstuff.elf",             desc: "Kernel support / FPKG enabler" },
+    { tag: "PL", name: "PLK.elf",                desc: "Payload management tools" },
+    { tag: "SM", name: "shadowmountplus.elf",    desc: "Mount and manage game images" }
+];
+payHead.textContent = "select one to send \u00b7 " + PAYLOADS.length + " available";
+
+var sending = false;
+var pendingSend = null;
+var serverMode = false;
+
+function bridge() {
+    try { return exploitEl.contentWindow.__jbShell || null; }
+    catch (e) { return null; }
+}
+
+function serverJailcheck() {
+    return new Promise(function (resolve) {
+        var settled = false;
+        function done(v) { if (settled) return; settled = true; resolve(v); }
+        var t = setTimeout(function () { done(false); }, 3000);
+        try {
+            fetch("/__jailcheck", { cache: "no-store" }).then(function (r) {
+                return r.json();
+            }).then(function (j) {
+                clearTimeout(t);
+                done(!!(j && j.open));
+            }, function () { clearTimeout(t); done(false); });
+        } catch (e) { clearTimeout(t); done(false); }
+    });
+}
+
+function portProbe() {
+    return new Promise(function (resolve) {
+        var settled = false;
+        function done(v) { if (settled) return; settled = true; resolve(v); }
+        var t = setTimeout(function () { done(false); }, 2000);
+        try {
+            fetch("http://127.0.0.1:9021/", { mode: "no-cors", cache: "no-store" })
+                .then(function () { clearTimeout(t); done(true); },
+                    function () { clearTimeout(t); done(false); });
+        } catch (e) { clearTimeout(t); done(false); }
+    });
+}
+
+function sendViaServer(p, badge, box) {
+    if (sending) return;
+    sending = true;
+    badge.textContent = "...";
+    badge.style.color = "var(--dim)";
+    fetch("/__sendpayload?name=" + encodeURIComponent(p.name), { method: "POST" })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+            sending = false;
+            if (!j || !j.ok) throw new Error((j && j.why) || "server send failed");
+            badge.textContent = "";
+            var ck = document.createElement("span");
+            ck.className = "badge-check";
+            badge.appendChild(ck);
+            badge.className = "badge sent";
+            badge.style.color = "";
+            log("payload " + p.name + " sent (" + j.bytes + " bytes, via server)", "ok");
+            setTimeout(function () { box.classList.add("home"); }, 3000);
+        }, function (err) {
+            sending = false;
+            badge.textContent = "!";
+            badge.className = "badge fail";
+            badge.style.color = "";
+            log("payload " + p.name + " failed: "
+                + (err && err.message ? err.message : String(err)), "err");
+            setTimeout(function () {
+                badge.textContent = p.tag; badge.className = "badge";
+            }, 2500);
+        });
+}
+
+function doBridgeSend(p, badge, box, b) {
+    if (!b || !b.ready()) return;
+    if (sending) return;
+    sending = true;
+    badge.textContent = "...";
+    badge.style.color = "var(--dim)";
+    b.send(p.name).then(function (r) {
+        sending = false;
+        badge.textContent = "";
+        var ck = document.createElement("span");
+        ck.className = "badge-check";
+        badge.appendChild(ck);
+        badge.className = "badge sent";
+        badge.style.color = "";
+        log("payload " + p.name + " sent (" + r.bytes + " bytes)", "ok");
+        setTimeout(function () { box.classList.add("home"); }, 3000);
+    }, function (err) {
+        sending = false;
+        badge.textContent = "!";
+        badge.className = "badge fail";
+        badge.style.color = "";
+        log("payload " + p.name + " failed: "
+            + (err && err.message ? err.message : String(err)), "err");
+        setTimeout(function () {
+            badge.textContent = p.tag; badge.className = "badge";
+        }, 2500);
+    });
+}
+
+function sendPayload(p, badge, box) {
+    if (sending) return;
+    if (serverMode) { sendViaServer(p, badge, box); return; }
+    var b = bridge();
+    if (b && b.ready()) { doBridgeSend(p, badge, box, b); return; }
+    if (pendingSend) {
+        log("bridge already being prepared for " + pendingSend.p.name, "");
+        return;
+    }
+    pendingSend = { p: p, badge: badge, box: box };
+    badge.textContent = "...";
+    badge.style.color = "var(--dim)";
+    log("starting the loader bridge to send " + p.name + " (offline needs the exploit once)", "");
+    arm(REUSE_URL);
+}
+
+PAYLOADS.forEach(function (p, i) {
+    var box = document.createElement("div");
+    box.className = "payload";
+    box.tabIndex = 0;
+    box.style.animationDelay = (i * 70) + "ms";
+
+    var badge = document.createElement("div");
+    badge.className = "badge";
+    badge.textContent = p.tag;
+
+    var mid = document.createElement("div");
+    mid.className = "mid";
+    var n = document.createElement("div"); n.className = "name"; n.textContent = p.name;
+    var d = document.createElement("div"); d.className = "desc"; d.textContent = p.desc;
+    mid.appendChild(n); mid.appendChild(d);
+
+    box.appendChild(badge); box.appendChild(mid);
+    box.addEventListener("click", function () { sendPayload(p, badge, box); });
+    box.addEventListener("blur", function () { box.classList.remove("home"); });
+    box.addEventListener("mouseleave", function () { box.classList.remove("home"); });
+    payList.appendChild(box);
+});
+
+var EXPLOIT_BASE = "slopkit/poops.html?go=1&auto=1&production=1"
+    + "&trigger=netcontrol&attempts=8&only="
+    + encodeURIComponent("ps0_preflight,ps1_prepare,ps3_stage0,ps4_validate,"
+        + "ps5_stage1,ps6_stage2,ps8_stage3,ps9_stage4,ps10_stage5")
+    + "&log=debug&payload=1";
+var RUN_URL   = EXPLOIT_BASE + "&v=final";
+var REUSE_URL = EXPLOIT_BASE + "&reuse=1&v=final";
+var state = "boot";
+var guardHit = false;
+var mirrorTimer = null;
+var mirrorSkip = 0;
+var stallTimer = null;
+var lastActivity = Date.now();
+var lastSig = "";
+var lastScrText = "", lastScrLine = "", lastStage = "";
+var earlyLogged = 0, curPct = 0;
+
+var DIRTY_KEY = "slopkit_dirty";
+function sessionDirty() {
+    try { return sessionStorage.getItem(DIRTY_KEY) === "1"; } catch (e) { return false; }
+}
+function setDirty(v) {
+    try {
+        if (v) sessionStorage.setItem(DIRTY_KEY, "1");
+        else sessionStorage.removeItem(DIRTY_KEY);
+    } catch (e) { }
+}
+
+window.addEventListener("error", function (e) {
+    log("script error: " + (e && e.message ? e.message : "?"), "err");
+});
+
+function setStateReady(note) {
+    state = "ready";
+    document.body.className = "st-idle";
+    jbBtn.className = "";
+    if (note) log(note, "");
+}
+function revealPayloadPage() {
+    logPanel.classList.remove("selected");
+    payZone.classList.add("selected");
+    try {
+        var first = payList.getElementsByClassName("payload")[0];
+        if (first) first.focus();
+    } catch (e) { }
+}
+function onJailbreakSuccess() {
+    if (state === "done") return;
+    var freshRun = (state === "run" && !guardHit);
+    state = "done";
+    setDirty(false);
+    stopMirror();
+    updateProgress(100);
+    log("ELF loader ready on port 9021 -- jailbreak complete", "ok");
+    document.body.className = "st-ok";
+    jbBtn.className = "done";
+    payBtn.classList.add("off");
+    if (freshRun) { startAutoPLK(); return; }
+    setTimeout(revealPayloadPage, 1000);
+}
+
+var AUTO_PLK_NAME = "PLK.elf";
+var AUTO_PLK_TEXT = "PS5 Payload Manager will be sent in 3 seconds";
+var AUTO_START = false;
+function closePage() {
+    try { window.close(); } catch (e) { }
+    setTimeout(function () {
+        try {
+            document.body.style.background = "#000";
+            document.documentElement.style.background = "#000";
+            document.body.innerHTML = "";
+        } catch (e) { }
+    }, 2000);
+}
+function startAutoPLK() {
+    log("automation: announcing PS5 Payload Manager", "");
+    var b = bridge();
+    var p = (b && typeof b.notify === "function")
+        ? b.notify(AUTO_PLK_TEXT)
+        : Promise.reject(new Error("no notify bridge"));
+    p.then(function () {
+        log("PS notification sent: \"" + AUTO_PLK_TEXT + "\"", "ok");
+    }, function (err) {
+        log("PS notification failed: "
+            + (err && err.message ? err.message : String(err)), "err");
+    }).then(function () {
+        probeServer(1500).then(function (up) {
+            if (up) serverPLK(); else offlinePLK();
+        });
+    });
+}
+
+function probeServer(ms) {
+    return new Promise(function (resolve) {
+        var done = false;
+        function win(v) {
+            if (!done) { done = true; clearTimeout(t); resolve(v); }
+        }
+        var t = setTimeout(function () { win(false); }, ms);
+        try {
+            fetch("/__jailcheck", { cache: "no-store" })
+                .then(function (r) { return r.json(); })
+                .then(function (j) {
+                    win(!!j && typeof j === "object" && "open" in j);
+                }, function () { win(false); });
+        } catch (e) { win(false); }
+    });
+}
+
+function serverPLK() {
+    fetch("/__sendpayload?name=" + encodeURIComponent(AUTO_PLK_NAME)
+        + "&delay=3000", { method: "POST" })
+        .then(function (r) {
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            return r.json();
+        })
+        .then(function (j) {
+            if (!j || !j.ok) throw new Error((j && j.why) || "queue failed");
+            log("PS5 Payload Manager scheduled -- closing this page", "ok");
+            setTimeout(closePage, 150);
+        })
+        .catch(function () { offlinePLK(); });   /* any failure falls back */
+}
+
+function offlinePLK() {
+    log("no server -- sending PS5 Payload Manager via bridge"
+        + " (waiting for the ELF loader to accept)", "");
+    setTimeout(function () {
+        var bb = bridge();
+        var job = (bb && typeof bb.autoload === "function")
+            ? bb.autoload(AUTO_PLK_NAME)
+            : (bb && bb.ready() ? bb.send(AUTO_PLK_NAME)
+                : Promise.reject(new Error("no bridge")));
+        job.then(function (r) {
+            log("PS5 Payload Manager sent (" + r.bytes
+                + " bytes, via bridge) -- closing this page", "ok");
+            setTimeout(closePage, 400);
+        }, function (e2) {
+            log("PS5 Payload Manager failed: "
+                + (e2 && e2.message ? e2.message : String(e2))
+                + " -- use the payload menu", "err");
+            setTimeout(revealPayloadPage, 500);
+        });
+    }, 3000);
+}
+function onRunFail(why) {
+    if (state === "done" || state === "broken") return;
+    stopMirror();
+    log("FAILED: " + (why || "see the log above"), "err");
+
+    var dirty = curPct >= 30 || /running the ladder/.test(lastStage || "");
+    if (dirty) {
+        log("the kernel may be half-corrupted", "err");
+        log("Reboot the console before jailbreaking again", "err");
+        document.body.className = "st-idle";
+        jbBtn.className = "broken";
+        state = "broken";
+        return;
+    }
+
+    setDirty(false);
+    log("press the circle to retry", "err");
+    document.body.className = "st-idle";
+    jbBtn.className = "failed";
+    state = "failed";
+    setTimeout(function () { if (state === "failed") setStateReady(); }, 1200);
+}
+
+/* ---------- boot ---------- */
+startCachePhase(function () {
+    if (sessionDirty()) {
+        log("the last jailbreak attempt did not finish cleanly", "err");
+        log("the kernel may be half-corrupted -- Reboot the console first", "err");
+        document.body.className = "st-idle";
+        jbBtn.className = "broken";
+        payBtn.classList.add("off");
+        state = "broken";
+        return;
+    }
+    setStateReady("ready! press the circle to jailbreak "
+        + "or Payloads if already jailbroken this session");
+    jbBtn.focus();
+    if (AUTO_START && fwOk)
+        setTimeout(function () { if (state === "ready") jbBtn.click(); }, 800);
+});
+
+
+jbBtn.addEventListener("click", function () {
+    if (state !== "ready" && state !== "failed") return;
+    if (!fwOk) {
+        log("unsupported firmware " + (fwStr || "(not a PS5 browser)")
+            + " -- supported: 9.00 to 12.00", "err");
+        return;
+    }
+    state = "run";
+    setDirty(true);
+    document.body.className = "st-run";
+    jbBtn.className = "running";
+    payBtn.classList.add("off");
+    jbBtn.getElementsByClassName("pct")[0].textContent = "0%";
+
+    log("starting jailbreak", "");
+    arm(RUN_URL);
+});
+
+payBtn.addEventListener("click", function () {
+    if (state !== "ready" && state !== "failed") return;
+    if (!fwOk) {
+        log("unsupported firmware " + (fwStr || "(not a PS5 browser)"), "err");
+        return;
+    }
+    state = "sender";
+    payBtn.classList.add("off");
+    log("checking for an ELF loader on port 9021...", "");
+    serverJailcheck().then(function (open) {
+        if (open) {
+            serverMode = true;
+            log("ELF loader is up -- no exploit needed", "ok");
+            onJailbreakSuccess();
+            return;
+        }
+        serverMode = false;
+        portProbe().then(function (up) {
+            if (up) {
+                log("ELF loader is up -- no exploit needed", "ok");
+                onJailbreakSuccess();
+                return;
+            }
+            log("no loader on port 9021 -- running the userland probe", "");
+            arm(REUSE_URL);
+        });
+    });
+});
+
+function arm(url) {
+    lastScrText = ""; lastScrLine = ""; lastStage = "";
+    earlyLogged = 0;
+    curPct = 0;
+    progFill.style.width = "0%";
+    lastActivity = Date.now();
+    lastSig = "";
+    if (mirrorTimer) clearInterval(mirrorTimer);
+    exploitEl.src = url;
+    mirrorTimer = setInterval(mirrorTick, 400);
+    startStallWatch();
+}
+
+function startStallWatch() {
+    if (stallTimer) clearInterval(stallTimer);
+    stallTimer = setInterval(function () {
+        if (state !== "run" && state !== "sender") return;
+        var idle = Date.now() - lastActivity;
+        var limit = state === "run" ? 240000 : 120000;   /* 4 min run / 2 min probe */
+        if (idle > limit) {
+            stopMirror();
+            if (state === "run") {
+                log("no progress for " + Math.round(idle / 1000)
+                    + "s -- the chain appears stuck", "err");
+                log("the kernel may be half-corrupted Reboot before trying again", "err");
+                document.body.className = "st-idle";
+                jbBtn.className = "broken";
+                state = "broken";
+            } else {
+                log("loader check stalled!", "err");
+                payBtn.classList.remove("off");
+                setStateReady("ready! press the circle to jailbreak");
+            }
+        }
+    }, 15000);
+}
+
+var SHOW_RE = /^(POOPS-|LATCH-|TRIGGER-|OFFSETS-|MODULE-BASES|WEBKIT-BASE|READ-PRIMITIVE|PRIMITIVE-|SSV-|ADDROF-|AUTO-RETRY|STAGE[0-5]-|SOCKETS|SPAWN|WAKEGATE|ELFLDR|ELF-|CHAIN-DEAD|FD-SWEEP|SHELL-GUARD)/;
+function showLine(l) {
+    if (SHOW_RE.test(l)) return true;
+    if (/^> /.test(l)) return true;
+    if (/(PASS|SKIP|FAIL)$/.test(l)) return true;
+    if (/FAIL|ERROR|REFUSED|THREW|REBOOT|STALLED|GIVE-UP/i.test(l)) return true;
+    return false;
+}
+function lineType(l) {
+    if (/SHELL-GUARD/.test(l)) return "ok";
+    if (/CHAIN-DEAD|GIVE-UP/i.test(l)) return "err";
+    if (/FAIL|ERROR|REFUSED|THREW|REBOOT|STALLED/i.test(l) && !/^AUTO-RETRY/.test(l)) return "err";
+    if (/PASS$/.test(l) || /^> /.test(l)
+        || /^(READ-PRIMITIVE|PRIMITIVE-UP|OFFSETS-READY|MODULE-BASES|STAGE[0-5]-DONE|ELFLDR|SOCKETS|SPAWN)/.test(l)) return "ok";
+    return "";
+}
+function countPass(doc) {
+    var rows = doc.getElementById("rows");
+    if (!rows || !rows.children) return 0;
+    var n = 0;
+    for (var i = 0; i < rows.children.length; ++i) {
+        if ((rows.children[i].className || "").indexOf("r-PASS") !== -1) n++;
+    }
+    return n;
+}
+var MILESTONES = [
+    [/preflight/, 4],
+    [/webkit bug/, 8],
+    [/loading poops_lib/, 16],
+    [/prepare\(\)/, 22],
+    [/checking for an existing ELF loader/, 26],
+    [/running the ladder/, 30]
+];
+function computeProgress(stageText, passCount) {
+    var p = 0, t = stageText || "";
+    for (var i = 0; i < MILESTONES.length; ++i)
+        if (MILESTONES[i][0].test(t)) p = Math.max(p, MILESTONES[i][1]);
+    if (passCount > 0) p = Math.max(p, 30 + Math.min(passCount, 9) / 9 * 60);
+    return Math.round(p);
+}
+function updateProgress(p) {
+    if (p <= curPct) return;
+    curPct = p;
+    progFill.style.width = p + "%";
+    var pctEl = jbBtn.getElementsByClassName("pct")[0];
+    if (pctEl) pctEl.textContent = p + "%";
+}
+
+function mirrorTick() {
+    if (state === "run" && (++mirrorSkip % 3) !== 0) return;
+    var doc;
+    try { doc = exploitEl.contentDocument; } catch (e) { return; }
+    if (!doc) return;
+
+    var b = bridge();
+    var stageEl = doc.getElementById("stage");
+    var stageTxt = stageEl ? (stageEl.textContent || "") : "";
+
+    if ((b && b.ready()) || stageTxt.indexOf("ELF LOADER READY") !== -1) {
+        if (pendingSend) {
+            var job = pendingSend;
+            pendingSend = null;
+            doBridgeSend(job.p, job.badge, job.box, b || bridge());
+        }
+        onJailbreakSuccess();
+        return;
+    }
+
+    if (stageTxt !== lastStage) {
+        lastStage = stageTxt;
+        if (/SHELL-GUARD/.test(stageTxt)) guardHit = true;
+        var bad = stageEl && (stageEl.className || "").indexOf("bad") !== -1;
+        if (stageTxt) log("[stage] " + stageTxt, bad ? "err" : "");
+    }
+    updateProgress(computeProgress(lastStage, countPass(doc)));
+
+    if (stageEl && (stageEl.className || "").indexOf("bad") !== -1) {
+        if (pendingSend) {
+            var jb = pendingSend;
+            pendingSend = null;
+            jb.badge.textContent = "!";
+            jb.badge.className = "badge fail";
+            log("could not start the loader bridge for " + jb.p.name, "err");
+            setTimeout(function () {
+                jb.badge.textContent = jb.p.tag; jb.badge.className = "badge";
+            }, 2500);
+        }
+        if (state === "sender") {
+            stopMirror();
+            if (stageTxt.indexOf("no ELF loader found!") !== -1) {
+                log("no ELF loader on port 9021 run jailbreak first", "err");
+            } else {
+                log("loader check failed: " + stageTxt, "err");
+            }
+            payBtn.classList.add("deny");
+            setTimeout(function () { payBtn.classList.remove("deny"); }, 900);
+            payBtn.classList.remove("off");
+            setStateReady("ready! press the circle to jailbreak");
+            return;
+        }
+        onRunFail(stageTxt);
+        return;
+    }
+
+    var scr = doc.getElementById("scr");
+    if (scr) {
+        var text = scr.textContent || "";
+        if (text && text !== lastScrText) {
+            var arr = text.split("\n");
+            var newest = arr[arr.length - 1].trim();
+            if (newest && newest !== lastScrLine) {
+                var idx = -1;
+                for (var i = arr.length - 1; i >= 0 && i >= arr.length - 4; --i) {
+                    if (arr[i].trim() === lastScrLine) { idx = i; break; }
+                }
+                if (idx === -1) idx = arr.length - 2;
+                for (var j = idx + 1; j < arr.length; ++j) {
+                    var line = arr[j].trim();
+                    if (line && showLine(line)) {
+                        if (line.indexOf("SHELL-GUARD") === 0) guardHit = true;
+                        log(line, lineType(line));
+                    }
+                }
+                lastScrLine = newest;
+            }
+            lastScrText = text;
+        }
+    }
+
+    var early = doc.getElementById("early");
+    if (early && early.textContent) {
+        var elines = early.textContent.split("\n");
+        if (elines.length < earlyLogged) earlyLogged = 0;
+        for (; earlyLogged < elines.length; earlyLogged++) {
+            var e2 = elines[earlyLogged].trim();
+            if (e2) log(e2, /ERROR|FAIL/i.test(e2) ? "err" : "");
+        }
+    }
+
+    var sig = lastStage + "|" + lastScrLine + "|" + earlyLogged + "|" + curPct;
+    if (sig !== lastSig) {
+        lastSig = sig;
+        lastActivity = Date.now();
+    }
+}
+
+function stopMirror() {
+    if (mirrorTimer) { clearInterval(mirrorTimer); mirrorTimer = null; }
+    if (stallTimer) { clearInterval(stallTimer); stallTimer = null; }
+}
+
+})();
+</script>
+</body>
+</html>

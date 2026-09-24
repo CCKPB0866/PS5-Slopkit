@@ -1,0 +1,44 @@
+CACHE MANIFEST
+# slopkit modification -- offline cache manifest
+
+# auto-fingerprint: v2-static-2026-09-24
+
+CACHE:
+slopkit/poops.html?go=1&auto=1&production=1&trigger=netcontrol&attempts=8&only=ps0_preflight%2Cps1_prepare%2Cps3_stage0%2Cps4_validate%2Cps5_stage1%2Cps6_stage2%2Cps8_stage3%2Cps9_stage4%2Cps10_stage5&log=debug&payload=1&v=final
+slopkit/poops.html?go=1&auto=1&production=1&trigger=netcontrol&attempts=8&only=ps0_preflight%2Cps1_prepare%2Cps3_stage0%2Cps4_validate%2Cps5_stage1%2Cps6_stage2%2Cps8_stage3%2Cps9_stage4%2Cps10_stage5&log=debug&payload=1&reuse=1&v=final
+slopkit/rop.js?v=final
+slopkit/main.js?v=final
+slopkit/syscalls.js
+slopkit/int64.js
+slopkit/core.js?v=final
+slopkit/mem.js?v=final
+slopkit/poops.js?v=final
+slopkit/rop_slave.js?v=final
+offsets/9.00.js?v=final
+offsets/9.05.js?v=final
+offsets/9.20.js?v=final
+offsets/9.40.js?v=final
+offsets/9.60.js?v=final
+offsets/10.00.js?v=final
+offsets/10.01.js?v=final
+offsets/10.20.js?v=final
+offsets/10.40.js?v=final
+offsets/10.60.js?v=final
+offsets/11.00.js?v=final
+offsets/11.20.js?v=final
+offsets/11.40.js?v=final
+offsets/11.60.js?v=final
+offsets/12.00.js?v=final
+payloads/elfldr-ps5-1360.elf
+payloads/kexp-v0.7-b12c352.bin
+payloads/ftpsrv-ps5.elf
+payloads/gdbsrv-ps5.elf
+payloads/klogsrv-ps5.elf
+payloads/shsrv-ps5.elf
+payloads/websrv-ps5.elf
+payloads/kstuff.elf
+payloads/PLK.elf
+payloads/shadowmountplus.elf
+
+NETWORK:
+*
