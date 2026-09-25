@@ -2760,13 +2760,106 @@ async function autoloadPayload(name) {
     return await sendPayloadToElfldr(name);
 }
 
+/* mod: auto-deploy the site to the console disk and arm the loopback twin
+   (WKAL-style offline host) -- zero user actions. After a jailbreak the
+   chain writes every site file to BOTH candidate roots (websrv serves one
+   of them), so the loopback URL works with the network switch OFF, where
+   the remote URL itself is blocked by the browser gate (WV-109144-9).
+   Marker-gated: writes happen once, later jailbreaks skip instantly. */
+const OFFLINE_MARKER = "/data/slopkit-offline/.installed";
+const OFFLINE_ROOTS = [
+    "/data/slopkit-offline",
+    "/user/homebrew/www/slopkit"
+];
+const OFFLINE_FILES = [
+    "index.html", "slopkit.appcache",
+    "slopkit/core.js", "slopkit/int64.js", "slopkit/main.js",
+    "slopkit/mem.js", "slopkit/poops.html", "slopkit/poops.js",
+    "slopkit/rop.js", "slopkit/rop_slave.js", "slopkit/syscalls.js",
+    "offsets/9.00.js", "offsets/9.05.js", "offsets/9.20.js",
+    "offsets/9.40.js", "offsets/9.60.js", "offsets/10.00.js",
+    "offsets/10.01.js", "offsets/10.20.js", "offsets/10.40.js",
+    "offsets/10.60.js", "offsets/11.00.js", "offsets/11.20.js",
+    "offsets/11.40.js", "offsets/11.60.js", "offsets/12.00.js",
+    "payloads/elfldr-ps5-1360.elf", "payloads/kexp-v0.7-b12c352.bin",
+    "payloads/ftpsrv-ps5.elf", "payloads/gdbsrv-ps5.elf",
+    "payloads/klogsrv-ps5.elf", "payloads/shsrv-ps5.elf",
+    "payloads/websrv-ps5.elf", "payloads/kstuff.elf",
+    "payloads/PLK.elf", "payloads/shadowmountplus.elf"
+];
+
+function fsPathBuf(pathStr) {
+    const p = mem(pathStr.length + 1);
+    for (let i = 0; i < pathStr.length; ++i)
+        p.u8[i] = pathStr.charCodeAt(i) & 0xff;
+    p.u8[pathStr.length] = 0;
+    return p;
+}
+
+async function fsMkdir(pathStr) {
+    const p = fsPathBuf(pathStr);
+    await sys(0x88, p.ptr, 0x1ff);   /* mkdir(path, 0777) -- EEXIST fine */
+}
+
+async function fsWriteFile(pathStr, bytes) {
+    const p = fsPathBuf(pathStr);
+    const r = await sys(0x5, p.ptr, 0x601, 0x1b6);  /* open(., O_WRONLY|O_CREAT|O_TRUNC, 0666) */
+    if (r.failed || r.s32 < 0)
+        throw new Error("open " + pathStr + ": " + r.errText);
+    const fd = r.s32;
+    track(fd);
+    try {
+        let sent = 0;
+        while (sent < bytes.length) {
+            const n = Math.min(0x8000, bytes.length - sent);
+            payloadSendStore.u8.set(bytes.subarray(sent, sent + n), 0);
+            const w = await sys(0x4, fd, payloadSendStore.ptr, n);
+            if (w.failed || w.s32 <= 0)
+                throw new Error("write " + pathStr + " @" + sent + ": " + w.errText);
+            sent += w.s32;
+        }
+    } finally {
+        await sys(0x6, fd);
+        untrack(fd);
+    }
+}
+
+async function deployOfflineHost() {
+    preparePayloadSender();
+    /* marker probe: already installed -> skip the 10 MB of writes */
+    const mp = fsPathBuf(OFFLINE_MARKER);
+    const mr = await sys(0x5, mp.ptr, 0, 0);   /* open(O_RDONLY) */
+    if (!mr.failed && mr.s32 >= 0) {
+        await sys(0x6, mr.s32);
+        return { ok: true, skipped: true, files: 0 };
+    }
+    let files = 0;
+    for (const root of OFFLINE_ROOTS) {
+        await fsMkdir(root);
+        await fsMkdir(root + "/slopkit");
+        await fsMkdir(root + "/offsets");
+        await fsMkdir(root + "/payloads");
+        for (const rel of OFFLINE_FILES) {
+            const res = await fetch("../" + rel, { cache: "default" });
+            if (!res.ok)
+                throw new Error("fetch " + rel + ": HTTP " + res.status);
+            const bytes = new Uint8Array(await res.arrayBuffer());
+            await fsWriteFile(root + "/" + rel, bytes);
+            files++;
+        }
+    }
+    await fsWriteFile(OFFLINE_MARKER, new Uint8Array([0x76, 0x38, 0x0a]));
+    return { ok: true, skipped: false, files: files };
+}
+
 // --- modification: shell bridge (for the slopkit modification shell page,
 // --- which runs this document in a hidden same-origin iframe) ---
 window.__jbShell = {
     ready: function () { return elfldrSpawned; },
     send: function (name) { return sendPayloadToElfldr(name); },
     notify: function (text) { return jbNotify(text); },
-    autoload: function (name) { return autoloadPayload(name); }
+    autoload: function (name) { return autoloadPayload(name); },
+    deployHost: function () { return deployOfflineHost(); }
 };
 </script>
 </body>
