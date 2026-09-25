@@ -693,7 +693,16 @@ function startCachePhase(onDone) {
         hide(true);
         try { ac.swapCache(); } catch (err) { }
         chipSet("updated", "ok");
-        log("offline cache updated -- new version active from the next visit", "");
+        /* mod: reload immediately when the user has not started anything --
+           otherwise the new code only activates on the NEXT visit (that is
+           exactly why the v8 deploy step "disappeared" during testing).
+           Never interrupt a running jailbreak. */
+        if (state === "boot" || state === "ready" || state === "failed") {
+            log("offline cache updated -- reloading to the new version", "");
+            setTimeout(function () { location.reload(); }, 800);
+        } else {
+            log("offline cache updated -- new version active from the next visit", "");
+        }
     });
     ac.addEventListener("error", function () {
         chipSet("incomplete -- retrying", "err");
