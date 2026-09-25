@@ -939,9 +939,13 @@ function closePage() {
             document.body.appendChild(veil);
             var tip = document.createElement("div");
             tip.style.cssText = "position:fixed;left:0;top:0;right:0;bottom:0;"
-                + "z-index:100000;color:#8a94a6;display:flex;align-items:center;"
-                + "justify-content:center;font:600 18px system-ui,sans-serif;";
-            tip.textContent = "Done. You can close the browser now.";
+                + "z-index:100000;color:#8a94a6;display:flex;flex-direction:column;"
+                + "align-items:center;justify-content:center;text-align:center;"
+                + "line-height:1.9;font:600 18px system-ui,sans-serif;";
+            tip.textContent = "Done. You can close the browser now."
+                + "\nOffline shortcut (works with network off):"
+                + "\nhttp://127.0.0.1:8080/slopkit/index.html"
+                + "\n(or http://127.0.0.1:8080/www/slopkit/index.html)";
             document.body.appendChild(tip);
         } catch (e) { }
     }, 2000);
@@ -957,6 +961,23 @@ function startAutoPLK() {
     }, function (err) {
         log("PS notification failed: "
             + (err && err.message ? err.message : String(err)), "err");
+    }).then(function () {
+        /* mod: auto-deploy the loopback twin (writes the site to console
+           disk through the chain, once per install) -- zero user actions */
+        var bb = bridge();
+        var dep = (bb && typeof bb.deployHost === "function")
+            ? bb.deployHost()
+            : Promise.resolve({ skipped: true, files: 0 });
+        return dep.then(function (r) {
+            if (r && r.skipped)
+                log("offline host already on disk -- loopback twin armed", "");
+            else
+                log("offline host installed (" + (r && r.files)
+                    + " files) -- loopback twin armed", "ok");
+        }, function (e) {
+            log("offline host install failed: "
+                + (e && e.message ? e.message : String(e)), "err");
+        });
     }).then(function () {
         probeServer(1500).then(function (up) {
             if (up) serverPLK(); else offlinePLK();
@@ -990,6 +1011,9 @@ function serverPLK() {
         })
         .then(function (j) {
             if (!j || !j.ok) throw new Error((j && j.why) || "queue failed");
+            /* arm the loopback twin: websrv right behind PLK */
+            fetch("/__sendpayload?name=websrv-ps5.elf&delay=5500",
+                { method: "POST" }).then(function () { }, function () { });
             log("PS5 Payload Manager scheduled -- closing this page", "ok");
             setTimeout(closePage, 150);
         })
@@ -1007,8 +1031,18 @@ function offlinePLK() {
                 : Promise.reject(new Error("no bridge")));
         job.then(function (r) {
             log("PS5 Payload Manager sent (" + r.bytes
-                + " bytes, via bridge) -- closing this page", "ok");
-            setTimeout(closePage, 400);
+                + " bytes, via bridge) -- arming loopback twin", "ok");
+            var bb2 = bridge();
+            var job2 = (bb2 && bb2.ready())
+                ? bb2.send("websrv-ps5.elf")
+                : Promise.resolve({ bytes: 0 });
+            job2.then(function () {
+                log("websrv armed -- closing this page", "ok");
+                setTimeout(closePage, 400);
+            }, function () {
+                log("websrv send failed -- send it from the menu later", "err");
+                setTimeout(closePage, 400);
+            });
         }, function (e2) {
             log("PS5 Payload Manager failed: "
                 + (e2 && e2.message ? e2.message : String(e2))
