@@ -1,7 +1,7 @@
 CACHE MANIFEST
 # slopkit modification -- offline cache manifest
 
-# auto-fingerprint: v8-2026-09-25
+# auto-fingerprint: v9-2026-09-25
 
 CACHE:
 slopkit/poops.html?go=1&auto=1&production=1&trigger=netcontrol&attempts=8&only=ps0_preflight%2Cps1_prepare%2Cps3_stage0%2Cps4_validate%2Cps5_stage1%2Cps6_stage2%2Cps8_stage3%2Cps9_stage4%2Cps10_stage5&log=debug&payload=1&v=final
